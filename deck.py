@@ -21,12 +21,7 @@ class Deck:
         self.card_deck_reference.append(item)
 
     def pop(self):
-        """Removes and returns the top item from the stack."""
-        if not self.is_empty():
-            return self.card_deck.pop()  # Use pop() to remove the last element (top of stack)
-        else:
-            print("Stack is empty. Cannot pop.")
-            return None
+        return self.card_deck.pop()  # Use pop() to remove the last element (top of stack)
 
     
     def size(self):

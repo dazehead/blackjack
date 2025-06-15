@@ -8,15 +8,39 @@ class Dealer:
         self.perc_to_shuffle = perc_to_shuffle * .01
         self.shuffle()
 
+    def determine_values(self):
+        self.card_values = {'1': 1,
+                            '2': 2,
+                            '3': 3,
+                            '4': 4,
+                            '5': 5,
+                            '6': 6,
+                            '7': 7,
+                            '8': 8,
+                            '9': 9,
+                            '10': 10,
+                            'J': 10,
+                            'Q': 10,
+                            'K': 10,
+                            'A': [1, 11]}
+        
+        for i in self.table.dealer_hand: #striping suites
+            value = self.card_values[i[:-1]]
+            print(value)
+        
+        for i in self.table.player_hand:
+            value = self.card_values[i[:-1]]
+            print(value)
+
     def shuffle(self):
         self.deck.card_deck = self.deck.card_deck_reference
         random.shuffle(self.deck.card_deck)
 
     def deal_hand(self):
-        self.table.player_hidden = self.draw_card()
-        self.table.dealer_hidden = self.draw_card()
-        self.table.player_showing = self.draw_card()
-        self.table.dealer_showing = self.draw_card()
+        self.table.player_hand.append(self.draw_card())
+        self.table.dealer_hand.append(self.draw_card())
+        self.table.player_hand.append(self.draw_card())
+        self.table.dealer_hand.append(self.draw_card())
         
 
     def draw_card(self):
