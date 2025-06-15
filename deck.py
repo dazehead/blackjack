@@ -2,7 +2,7 @@ class Deck:
     def __init__(self, num_of_decks = 6):
         self.card_deck = []
         self.card_deck_reference = []
-        self.items = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+        self.items = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
         
         self.suites = {'clubs':'♣',
                        'diamonds':'♦',

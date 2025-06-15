@@ -14,4 +14,9 @@ class Table:
         print(self.player_hand)
         print('\n')
 
+    def show_dealer_cards(self):
+        print(self.dealer_hand)
+        print(self.player_hand)
+        print('\n')
+
     
