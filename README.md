@@ -1,0 +1,2 @@
+# BlackJack
+This program will allow us to play blackjack based off of a preset basic strategy and simulate hundreds of thousands of games. It will also be able to keep a running count of the cards and perform deviations to the basic strategy determined by what count it is and simulate hundreds of thousand of games.
