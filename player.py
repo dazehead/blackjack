@@ -39,10 +39,11 @@ class Player:
         print('split')
 
     def _double_down(self, dealer):
-        print('double down')
+        dealer.player_hit()
+        self.stand = True
 
     def _surrender(self, dealer):
-        print('surrender')
+        self.stand = True
 
     def _exit_game(self, dealer):
         sys.exit()

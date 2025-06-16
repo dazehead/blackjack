@@ -7,16 +7,16 @@ class Table:
         self.dealer_hand = []
         self.player_hand = []
     
-    def show_table(self):
-        self.dealer_hidden = self.dealer_hand
-        self.dealer_hidden = ['Hidden', self.dealer_hand[1]]
-        print(self.dealer_hidden)
-        print(self.player_hand)
-        print('\n')
+    def show_table(self, dealer_hidden=True):
+        if dealer_hidden:
+            self.dealer_hidden = self.dealer_hand
+            self.dealer_hidden = ['Hidden', self.dealer_hand[1]]
+            print(self.dealer_hidden)
+            print(self.player_hand)
+            print('\n')
+        else:
+            print(self.dealer_hand)
+            print(self.player_hand)
 
-    def show_dealer_cards(self):
-        print(self.dealer_hand)
-        print(self.player_hand)
-        print('\n')
 
     

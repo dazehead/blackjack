@@ -25,11 +25,11 @@ class Game:
                 loop_breaker = 0
                 while dealer_loop:
                     dealer_loop = self.dealer.dealer_logic(self.player)
+                    self.table.show_table(dealer_hidden=False)
                     loop_breaker += 1
                     if loop_breaker > 10:
                         dealer_loop = False
 
-            self.table.show_dealer_cards()
             self.dealer.determine_winner(self.player)
 
             self.game_reset()
