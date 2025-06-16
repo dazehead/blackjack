@@ -26,7 +26,6 @@ class Dealer:
     def determine_scores(self, player_object):
         class_name = player_object.__class__.__name__.lower()
         setattr(player_object, f"{class_name}_score", [0,0])
-        # print(class_name)
 
         for i in getattr(self.table, f"{class_name}_hand"):
             value = self.card_values[i[:-1]]
@@ -39,7 +38,7 @@ class Dealer:
 
         if getattr(player_object, f"{class_name}_score")[0] > 21 and getattr(player_object, f"{class_name}_score")[1] > 21:
             player_object.has_busted = True
-            #print(f"has_busted : {player_object.has_busted}")
+
         attr_name = f"{class_name}_score"
         print(f"{attr_name}: {getattr(player_object, attr_name)}")
 
@@ -75,96 +74,36 @@ class Dealer:
         self.has_busted = False
 
     def determine_winner(self, player_object):
-        dealer_hard, dealer_soft = self.dealer_score
-        player_hard, player_soft = player_object.player_score
+        # Utility to pick the best score from [hard, soft]
+        def best_score(scores):
+            hard, soft = scores
+            valid = [s for s in (hard, soft) if s <= 21]
+            return max(valid) if valid else min(hard, soft)
 
-        if self.has_busted:
-            print('PLAYER IS THE WINNER - 1')
-            return
+        dealer_best = best_score(self.dealer_score)
+        player_best = best_score(player_object.player_score)
+
+        # 1) If player already busted → dealer wins
         if player_object.has_busted:
-            print('DEALER IS THE WINNER - 2')
+            print("DEALER IS THE WINNER")
             return
-        
-        if dealer_hard == dealer_soft:
-            if player_hard == player_soft:
-                if dealer_hard == player_hard:
-                    print('PUSH - 3')
-                    return
-                elif dealer_hard > player_hard:
-                    print('DEALER IS THE WINNER - 4')
-                    return
-                else:
-                    print('PLAYER IS THE WINNER - 5')
-                    return
-            else:
-                if player_soft > 21:
-                    if dealer_hard == player_hard:
-                        print('PUSH - 6')
-                        return
-                    elif dealer_hard > player_hard:
-                        print('DEALER IS THE WINNER - 7')
-                        return
-                    else:
-                        print('PLAYER IS THE WINNER - 8')
-                        return
-                else:
-                    if dealer_hard == player_soft:
-                        print('PUSH - 9')
-                        return
-                    elif dealer_hard > player_soft:
-                        print("DEALER IS THE WINNER - 10")
-                        return
-                    else:
-                        print('PLAYER IS THE WINNER - 11')
-                        return
-        # Presence of an ACE
+
+        # 2) If dealer busted → player wins
+        if self.has_busted:
+            print("PLAYER IS THE WINNER")
+            return
+
+        # 3) Now just compare best scores
+        if dealer_best == player_best:
+            print("PUSH")
+        elif dealer_best > player_best:
+            print("DEALER IS THE WINNER")
         else:
-            if player_hard == player_soft:
-                # only an ace in the dealers score
-                if dealer_soft > 21:
-                    if dealer_hard == player_hard:
-                        print("PUSH - 12")
-                        return
-                    elif dealer_hard > player_hard:
-                        print('DEALER IS THE WINNER - 13')
-                        return
-                    else:
-                        print('PLAYER IS THE WINNER - 14')
-                        return
-                else:
-                    if dealer_soft == player_hard:
-                        print("PUSH - 15")
-                        return
-                    elif dealer_soft > player_hard:
-                        print('DEALER IS THE WINNER - 16')
-                        return
-                    else:
-                        print('PLAYER IS THE WINNER - 17')
-                        return
-            else:
-                if player_soft > 21:
-                    if dealer_hard == player_hard:
-                        print("PUSH - 18")
-                        return
-                    elif dealer_hard > player_hard:
-                        print('DEALER IS THE WINNER - 19')
-                        return
-                    else:
-                        print('PLAYER IS THE WINNER - 20')
-                        return
-                else:
-                    if dealer_hard == player_soft:
-                        print("PUSH - 21")
-                        return
-                    elif dealer_hard > player_soft:
-                        print("DEALER IS THE WINNER - 22")
-                        return
-                    else:
-                        print('PLAYER IS THE WINNER - 23')  
-                        return       
+            print("PLAYER IS THE WINNER")
+
 
     def dealer_logic(self, player_object):
-        hard, soft = self.dealer_score               # [0] = Ace as 1 (“hard”), [1] = Ace as 11 (“soft”)
+        hard, soft = self.dealer_score   # [0] = Ace as 1 (“hard”), [1] = Ace as 11 (“soft”)
         player_hard, player_soft = player_object.player_score
 
         # 0) If dealer busts on BOTH counts, stop immediately
