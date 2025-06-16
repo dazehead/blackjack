@@ -9,6 +9,7 @@ class Game:
         self.player = Player(init_cash=10000)
 
         while True:
+            print('-----------------------------------------------------------')
             self.dealer.deal_hand()
             self.table.show_table()
             self.dealer.determine_scores(player_object=self.dealer)
@@ -20,12 +21,16 @@ class Game:
                 self.dealer.determine_scores(player_object=self.player)
             
             if not self.player.has_busted:
-                while self.dealer.dealer_score[0] < 17 and self.dealer.dealer_score[1] < 17:
-                    self.dealer.dealer_hit()
-                    self.dealer.determine_scores(player_object=self.dealer)
+                dealer_loop = True
+                loop_breaker = 0
+                while dealer_loop:
+                    dealer_loop = self.dealer.dealer_logic(self.player)
+                    loop_breaker += 1
+                    if loop_breaker > 10:
+                        dealer_loop = False
 
             self.table.show_dealer_cards()
-            self.dealer.determine_winner()
+            self.dealer.determine_winner(self.player)
 
             self.game_reset()
 
