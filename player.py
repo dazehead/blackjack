@@ -5,16 +5,14 @@ class Player:
     def __init__(self, init_cash = 10000):
         self.init_cash = init_cash
         self.player_score = [0,0]
-        self.has_busted = False
-        self.stand = False
 
-    def player_choice(self, dealer):
+    def player_choice(self, dealer, hand):
         acceptable_choices = []
         methods_raw = {name: func 
                        for name, func in inspect.getmembers(self, predicate=inspect.ismethod)
                        if name.startswith("_") and not name.startswith("__")}
         
-        if dealer.table.player_hand[0][:-1] != dealer.table.player_hand[1][:-1]: # drops _split if player hands are not matching
+        if hand.value[0][:-1] != hand.value[1][:-1] or len(hand) > 2: # drops _split if player hands are not matching
             methods_raw.pop("_split", None)
 
         methods = {i: func for i, (name, func) in enumerate(methods_raw.items(), start=1)}
@@ -27,30 +25,34 @@ class Player:
         while choice not in acceptable_choices:
             choice = int(input("\nChoose between the numbers provided: "))
 
-        methods[choice](dealer)
+        methods[choice](dealer, hand)
 
-    def _hit(self, dealer):
+    def _hit(self, dealer, hand):
+        dealer.player_hit(hand)
+
+    def _stand(self, dealer, hand):
+        hand.stand = True
+        hand.consolidated = True
+
+    def _split(self, dealer, hand):
+        dealer.table.split(dealer, hand)
+        
+    def _double_down(self, dealer, hand):
         dealer.player_hit()
+        hand.stand = True
+        hand.consolidated = True
+        hand.has_doubled = True
 
-    def _stand(self, dealer):
-        self.stand = True
+    def _surrender(self, dealer, hand):
+        hand.stand = True
+        hand.consolidated = True
+        hand.has_surrendered = True
 
-    def _split(self, dealer):
-        print('split')
-
-    def _double_down(self, dealer):
-        dealer.player_hit()
-        self.stand = True
-
-    def _surrender(self, dealer):
-        self.stand = True
-
-    def _exit_game(self, dealer):
+    def _exit_game(self, dealer, hand):
         sys.exit()
 
     def reset(self):
-        self.has_busted = False
-        self.stand = False
+        pass
 
 if __name__ == "__main__":
     player = Player()

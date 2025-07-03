@@ -19,7 +19,6 @@ class Dealer:
                             'Q': 10,
                             'K': 10,
                             'A': [1, 11]}
-        self.dealer_score = [0,0]
         self.has_busted = False
         self.shuffle()
 
@@ -27,20 +26,26 @@ class Dealer:
         class_name = player_object.__class__.__name__.lower()
         setattr(player_object, f"{class_name}_score", [0,0])
 
-        for i in getattr(self.table, f"{class_name}_hand"):
-            value = self.card_values[i[:-1]]
-            if type(value) == list:
-                getattr(player_object, f"{class_name}_score")[0] += value[0]
-                getattr(player_object, f"{class_name}_score")[1] += value[1]
-            else:
-                getattr(player_object, f"{class_name}_score")[0] += value
-                getattr(player_object, f"{class_name}_score")[1] += value
+        for node in getattr(self.table, f"{class_name}_hand"):
+            node.score = [0,0]
+            for i in node.value:
+                value = self.card_values[i[:-1]]
+                if type(value) == list:
+                    node.score[0] += value[0]
+                    node.score[1] += value[1]
+                    # getattr(player_object, f"{class_name}_score")[0] += value[0]
+                    # getattr(player_object, f"{class_name}_score")[1] += value[1]
+                else:
+                    node.score[0] += value
+                    node.score[1] += value
+                    # getattr(player_object, f"{class_name}_score")[0] += value
+                    # getattr(player_object, f"{class_name}_score")[1] += value
 
-        if getattr(player_object, f"{class_name}_score")[0] > 21 and getattr(player_object, f"{class_name}_score")[1] > 21:
-            player_object.has_busted = True
+            if node.score[0] > 21 and node.score[1] > 21:
+                node.has_busted = True
+                node.consolidated = True
 
-        attr_name = f"{class_name}_score"
-        print(f"{attr_name}: {getattr(player_object, attr_name)}")
+            print(f"{class_name} score: {node.score}")
 
     def shuffle(self):
         self.deck.card_deck = self.deck.card_deck_reference.copy()
@@ -52,8 +57,8 @@ class Dealer:
         self.table.player_hand.append(self.draw_card())
         self.table.dealer_hand.append(self.draw_card())
     
-    def player_hit(self):
-        self.table.player_hand.append(self.draw_card())
+    def player_hit(self, hand):
+        hand.value.append(self.draw_card())
     
     def dealer_hit(self):
         self.table.dealer_hand.append(self.draw_card())
@@ -73,42 +78,44 @@ class Dealer:
     def reset(self):
         self.has_busted = False
 
-    def determine_winner(self, player_object):
+    def determine_winner(self, hand):
         # Utility to pick the best score from [hard, soft]
         def best_score(scores):
             hard, soft = scores
             valid = [s for s in (hard, soft) if s <= 21]
             return max(valid) if valid else min(hard, soft)
 
-        dealer_best = best_score(self.dealer_score)
-        player_best = best_score(player_object.player_score)
+
+        dealer_best = best_score(self.table.dealer_hand.head.score)
+        player_best = best_score(hand.score)
 
         # 1) If player already busted → dealer wins
-        if player_object.has_busted:
-            print("DEALER IS THE WINNER")
+        if hand.has_busted:
+            self.table.round_results.append('Dealer')
             return
 
         # 2) If dealer busted → player wins
-        if self.has_busted:
-            print("PLAYER IS THE WINNER")
+        if self.table.dealer_hand.head.has_busted:
+            self.table.round_results.append('Player')
             return
 
         # 3) Now just compare best scores
         if dealer_best == player_best:
-            print("PUSH")
+            self.table.round_results.append('Push')
         elif dealer_best > player_best:
-            print("DEALER IS THE WINNER")
+            self.table.round_results.append('Dealer')
         else:
-            print("PLAYER IS THE WINNER")
+            self.table.round_results.append('Player')
 
 
     def dealer_logic(self, player_object):
-        hard, soft = self.dealer_score   # [0] = Ace as 1 (“hard”), [1] = Ace as 11 (“soft”)
+        hard, soft = self.table.dealer_hand.head.score   # [0] = Ace as 1 (“hard”), [1] = Ace as 11 (“soft”)
         player_hard, player_soft = player_object.player_score
 
         # 0) If dealer busts on BOTH counts, stop immediately
         if hard > 21:
             print("Dealer busts!")
+            self.table.dealer_hand.head.has_busted=True
             return False
 
         # 1) Soft-17 rule: if there’s an ace (hard != soft) and soft == 17 → hit
