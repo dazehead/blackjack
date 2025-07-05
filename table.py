@@ -54,26 +54,72 @@ class LinkedList:
 
 
 class Table:
-    def __init__(self):
+    def __init__(self, player):
+        self.player = player
+        self.chips = {'1': 5,
+                      '2': 25,
+                      '3': 100,
+                      '4': 500,
+                      '5': 0}
+        self.bet_size = 10
         self.dealer_hand = LinkedList()
         self.player_hand = LinkedList()
         self.round_results = []
+
 
     def reset(self):
         self.dealer_hand = LinkedList()
         self.player_hand = LinkedList()
         self.round_results = []
 
+    def reset_bet_size(self):
+        self.bet_size = 10
+
     def complete_bets(self):
         print(self.round_results)
+        for item in self.round_results:
+            if item['winner'] == 'Dealer':
+                if item['has_doubled']:
+                    self.player.cash -= self.bet_size * 2
+                else:
+                    self.player.cash -= self.bet_size
+            elif item['winner'] == 'Player':
+                if item['has_blackjack']:
+                    self.player.cash += self.bet_size * 1.5
+                elif item['has_doubled']:
+                    self.player.cash += self.bet_size * 2
+                else:
+                    self.player.cash += self.bet_size
+            elif item['winner'] == 'Surrender':
+                self.player.cash -= self.bet_size // 2
+            elif item['winner'] == 'Push':
+                pass # no money gets taken out tie
+    def initial_bets(self, strategy: object = None):
+        print(f'Total Cash: {self.player.cash}')
 
-    def initial_bets(self):
-        print('start initial betting')
+        # This is just taking the original bet as of right now
+        if strategy:
+            self.bet_size = self.bet_size
+            
+        else:
+            for key, chip in self.chips.items():
+                print(f'{key}: {str(chip)}')
+            print('6: reset back to minimum')
+            bet = input('Please choose: ')
+            while bet not in list(self.chips.keys()):
+                if bet == '6':
+                    break
+                bet = input('Please choose correct: ')
+            try:
+                self.bet_size += self.chips[bet]
+            except Exception:
+                self.reset_bet_size()
+
+            print(f"Current Bet Size: {self.bet_size}")
+            print('-----------------------------------------------')
 
     def split(self, dealer, hand):
         card1, card2 = hand.value
         hand.value = [card1, dealer.draw_card()]
         self.player_hand.new_hand(card2, dealer)
-        # hand.next.value = [card2, dealer.draw_card()]
-        
     

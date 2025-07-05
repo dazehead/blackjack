@@ -1,16 +1,20 @@
 from dealer import Dealer
 from player import Player
 from table import Table
+from basic_strategy import BasicStrategy
 
 class Game:
-    def __init__(self):
-        self.table = Table()
+    def __init__(self, strategy=None, games_to_play = None):
+        self.game_count = 0
+        self.games_to_play = games_to_play
+        self.player = Player(init_cash=10000, strategy=strategy)
+        self.table = Table(self.player)
         self.dealer = Dealer(self.table)
-        self.player = Player(init_cash=10000)
+
 
         while True:
             print('-----------------------------------------------------------')
-            self.table.initial_bets()
+            self.table.initial_bets(strategy=strategy)
             self.dealer.deal_hand()
             
             print(self.table.dealer_hand)
@@ -18,6 +22,7 @@ class Game:
 
             self.dealer.determine_scores(player_object=self.dealer)
             self.dealer.determine_scores(player_object=self.player)
+
             for hand in self.table.player_hand:
                 while not hand.consolidated:
                     self.player_turn(hand)
@@ -31,18 +36,28 @@ class Game:
             print(self.table.player_hand)
             self.table.complete_bets()
 
+            self.game_count += 1
+            if games_to_play:
+                if games_to_play == self.game_count:
+                    break
             self.game_reset()
 
 
     def game_reset(self):
         self.table.reset()
-        self.player.reset()
         self.dealer.reset()
     
     def player_turn(self, hand):
-        while not hand.stand and not hand.has_busted: # players turn
+        if hand.score[1] == 21: # has blackjack
+            hand.blackjack = True
+            hand.stand = True
+            hand.consolidated = True
+        while not hand.stand and not hand.has_busted and not hand.has_surrendered: # players turn
             print(self.table.player_hand)
-            self.player.player_choice(dealer = self.dealer, hand=hand)
+            self.player.player_choice(
+                dealer = self.dealer, 
+                hand=hand, 
+                dealer_hand=self.table.dealer_hand.head)
             self.dealer.determine_scores(player_object=self.player)
             print('------------------------------------')
 
@@ -59,4 +74,5 @@ class Game:
                         dealer_loop = False  
 
 if __name__ == "__main__":
-    game = Game()
+    strategy = BasicStrategy()
+    game = Game(strategy=strategy, games_to_play=1)

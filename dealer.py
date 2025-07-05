@@ -4,7 +4,7 @@ from deck import Deck
 class Dealer:
     def __init__(self, table_object=None, perc_to_shuffle = 20):
         self.table = table_object
-        self.deck = Deck(num_of_decks=1)
+        self.deck = Deck(num_of_decks=1, loaded=True)
         self.perc_to_shuffle = perc_to_shuffle * .01
         self.card_values = {'2': 2,
                             '3': 3,
@@ -33,13 +33,9 @@ class Dealer:
                 if type(value) == list:
                     node.score[0] += value[0]
                     node.score[1] += value[1]
-                    # getattr(player_object, f"{class_name}_score")[0] += value[0]
-                    # getattr(player_object, f"{class_name}_score")[1] += value[1]
                 else:
                     node.score[0] += value
                     node.score[1] += value
-                    # getattr(player_object, f"{class_name}_score")[0] += value
-                    # getattr(player_object, f"{class_name}_score")[1] += value
 
             if node.score[0] > 21 and node.score[1] > 21:
                 node.has_busted = True
@@ -89,24 +85,42 @@ class Dealer:
         dealer_best = best_score(self.table.dealer_hand.head.score)
         player_best = best_score(hand.score)
 
-        # 1) If player already busted → dealer wins
+
+        if hand.has_surrendered:
+            self.table.round_results.append({'winner': 'Surrender',
+                                             'has_doubled': hand.has_doubled,
+                                             'has_blackjack': hand.blackjack})
+            return
         if hand.has_busted:
-            self.table.round_results.append('Dealer')
+            #self.table.round_results.append('Dealer')
+            self.table.round_results.append({'winner': 'Dealer',
+                                             'has_doubled': hand.has_doubled,
+                                             'has_blackjack': hand.blackjack})
             return
 
         # 2) If dealer busted → player wins
         if self.table.dealer_hand.head.has_busted:
-            self.table.round_results.append('Player')
+            #self.table.round_results.append('Player')
+            self.table.round_results.append({'winner': 'Player',
+                                             'has_doubled': hand.has_doubled,
+                                             'has_blackjack': hand.blackjack})
             return
 
         # 3) Now just compare best scores
         if dealer_best == player_best:
-            self.table.round_results.append('Push')
+            self.table.round_results.append({'winner': 'Push',
+                                             'has_doubled': hand.has_doubled,
+                                             'has_blackjack': hand.blackjack})
         elif dealer_best > player_best:
-            self.table.round_results.append('Dealer')
+            #self.table.round_results.append('Dealer')
+            self.table.round_results.append({'winner': 'Dealer',
+                                             'has_doubled': hand.has_doubled,
+                                             'has_blackjack': hand.blackjack})
         else:
-            self.table.round_results.append('Player')
-
+            #self.table.round_results.append('Player')
+            self.table.round_results.append({'winner': 'Player',
+                                             'has_doubled': hand.has_doubled,
+                                             'has_blackjack': hand.blackjack})
 
     def dealer_logic(self, player_object):
         hard, soft = self.table.dealer_hand.head.score   # [0] = Ace as 1 (“hard”), [1] = Ace as 11 (“soft”)
